@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MathX Calculator 2.0</title>
+    <style type="text/css">
+        *, *:after, *:before {
+        box-sizing: border-box;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        box-sizing: border-box;
+    }
+
+    html{
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    #logo{
+        text-align: center;
+        font-size: 2em;
+        font-family: Arial, monospace, sans-serif;
+        color: #fff;
+    }
+
+    #screen{
+        width: 100%; min-height: 40px;
+        margin: 10px 0 20px;
+        font-family: 'Offside', cursive;
+        color: #333;    box-shadow: inset 0 0 5px 1px rgba(0, 0, 0, 0.5);
+        background: #9AA994;
+        padding: 5px 10px 0;
+        border: none;
+        border-radius: 2px;
+        cursor: default;
+        text-align: right;
+        overflow-wrap: break-word;
+    }
+
+    #calculadora{
+        max-width: 300px; min-height: 500px;height: fit-content;
+        padding: 20px;
+        border-radius: 5px;
+        border: 1px solid;
+        margin: 20vh auto;
+        background: #37474f;
+        background: linear-gradient(to bottom, #37474f 0%, #263238 100%);
+        box-shadow: 0 2px 4px #000;
+    }
+
+    #buttons{
+        display: grid;
+        grid-gap: 5px;
+        width: 100%; height: 350px;
+        align-items: stretch;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-areas: "leftparenthesis rightparenthesis limpiar borrar"
+                             "potencia sqrt cbrt multiplicar"
+                             "siete ocho nueve dividir"
+                             "cuatro cinco seis restar"
+                             "uno dos tres sumar"
+                             "másmenos cero punto igual"
+    }
+
+    .button{
+        height: auto; width: auto;
+        margin-bottom: 5px
+        height: 50px;
+        border: none;
+        border-radius: 4px;
+        color: #FFF;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        background: #455a64;
+        background: linear-gradient(to bottom, #455a64 0%, #37474f 100%);
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+        margin-bottom: 11px;
+    }
+
+    .button:active{
+        color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    #copyright{
+        text-align: center;
+        margin: 10px auto;
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.7);
+        text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+        text-align: center;
+        cursor: default;
+    }
+
+    .editar{
+        background: #c62828;
+        background: linear-gradient(to bottom, #c62828 0%, #b71c1c 100%);
+        box-shadow: 0 4px 0 rgba(60, 3, 3, 0.7);
+    }
+
+    .editar:active{
+        color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 1px 3px rgba(60, 3, 3, 0.7);
+    }
+    </style>
+</head>
+<body>
+    <div id="calculadora">
+        <div id="logo">M<b style="color: #f00;">X</b></div>
+        <div id="screen"></div>
+        <div id="buttons">
+            <button class="button" onclick="operator(0,0)" style="grid-area: cero;">0</button>
+            <button class="button" onclick="operator(1,1)" style="grid-area: uno;">1</button>
+            <button class="button" onclick="operator(2,2)" style="grid-area: dos;">2</button>
+            <button class="button" onclick="operator(3,3)" style="grid-area: tres;">3</button>
+            <button class="button" onclick="operator(4,4)" style="grid-area: cuatro;">4</button>
+            <button class="button" onclick="operator(5,5)" style="grid-area: cinco;">5</button>
+            <button class="button" onclick="operator(6,6)" style="grid-area: seis;">6</button>
+            <button class="button" onclick="operator(7,7)" style="grid-area: siete;">7</button>
+            <button class="button" onclick="operator(8,8)" style="grid-area: ocho;">8</button>
+            <button class="button" onclick="operator(9,9)" style="grid-area: nueve;">9</button>
+            <button class="button" onclick="operator('.','.')" style="grid-area: punto;">.</button>
+            <button class="button" onclick="operator('+','+')" style="grid-area: sumar;">+</button>
+            <button class="button" onclick="operator('-','-')" style="grid-area: restar;">-</button>
+            <button class="button" onclick="operator('*','x')" style="grid-area: multiplicar;">x</button>
+            <button class="button" onclick="operator('/','÷')" style="grid-area: dividir;">÷</button>
+            <button class="button" onclick="operator('**','^')" style="grid-area: potencia;">xⁿ</button>
+            <button class="button" onclick="operator('Math.sqrt(', '²√(')" style="grid-area: sqrt;">²√</button>
+            <button class="button" onclick="operator('Math.cbrt(','³√(')" style="grid-area: cbrt;">³√</button>
+            <button class="button" onclick="operator('±','')" style="grid-area: másmenos;">±</button>
+            <button class="button" onclick="operator('=','')" style="grid-area: igual;">=</button>
+            <button class="button" onclick="operator('(','(')" style="grid-area: leftparenthesis;">(</button>
+            <button class="button" onclick="operator(')',')')" style="grid-area: rightparenthesis;">)</button>
+            <button class="button editar" onclick="operator('C','')" style="grid-area: borrar;">Borrar</button>
+            <button class="button editar" onclick="operator('CA','')" style="grid-area: limpiar;">Limpiar</button>
+        </div>
+        <div id="copyright">MathX calculator 2.0</div>
+    </div>
+    <script>
+        const byId = selector => document.getElementById(selector);
+let nodeArray = [];
+let screenArray = [];
+let count1, count2;
+
+function operator(node,display) {
+
+    let screen = byId('screen');
+    switch (node) {
+        case 'CA':
+            nodeArray = [];
+            screenArray = [];
+            screen.innerHTML = screenArray.join('');
+            break;
+        case 'C':
+            nodeArray.pop();
+            screenArray.pop();
+            screen.innerHTML = screenArray.join('');
+            break;
+        case '±':
+            if(nodeArray[0] == "-"){
+                nodeArray.shift();
+                screenArray.shift();
+            }else {
+                nodeArray.unshift('-');
+                screenArray.unshift('-');
+            }
+            break;
+        case '=':
+            let ArrayJoin = screenArray.join('');
+            count1 = 0; count2 = 0;
+            for (parenthesis of ArrayJoin){
+                if(parenthesis == "(") count1++;
+                if(parenthesis == ")") count2++;
+            }
+            for (let i = count2; i < count1; i++){
+                nodeArray.push(')')
+                screenArray.push(')');
+            }
+            let a = nodeArray.join('');
+            let resultado = eval(a);
+            screen.innerHTML = resultado;
+            nodeArray = []; screenArray = [];
+            nodeArray.push(resultado);
+            screenArray.push(resultado);
+            break;
+        default:
+            nodeArray.push(node);
+            screenArray.push(display);
+            break;
+    }
+    screen.innerHTML = screenArray.join('');
+}
+
+    </script>    
+</body>
+</html>
