@@ -135,7 +135,7 @@
 <body>
     <div id="calculadora">
         <div id="logo">Math<b style="color: #f00;">X</b></div>
-        <div id="screen"> </div>
+        <div id="screen">
             <div id="subscreen2"></div>
             <div id="subscreen1"></div>
         </div>
@@ -151,11 +151,11 @@
             <button class="button" onclick="operator(8,8,'number')" style="grid-area: ocho;">8</button>
             <button class="button" onclick="operator(9,9,'number')" style="grid-area: nueve;">9</button>
             <button class="button" onclick="operator('.','.','point')" style="grid-area: punto;">.</button>
-            <button class="button" onclick="operator('+','+','plus')" style="grid-area: sumar;">+</button>
-            <button class="button" onclick="operator('-','-','minus')" style="grid-area: restar;">-</button>
-            <button class="button" onclick="operator('*','x','multiplication')" style="grid-area: multiplicar;">x</button>
-            <button class="button" onclick="operator('/','÷','division')" style="grid-area: dividir;">÷</button>
-            <button class="button" onclick="operator('**','^','empowerment')" style="grid-area: potencia;">xⁿ</button>
+            <button class="button" onclick="operator('+','+','operator')" style="grid-area: sumar;">+</button>
+            <button class="button" onclick="operator('-','-','operator')" style="grid-area: restar;">-</button>
+            <button class="button" onclick="operator('*','x','operator')" style="grid-area: multiplicar;">x</button>
+            <button class="button" onclick="operator('/','÷','operator')" style="grid-area: dividir;">÷</button>
+            <button class="button" onclick="operator('**','^','operator')" style="grid-area: potencia;">xⁿ</button>
             <button class="button" onclick="operator('Math.sqrt(', '²√(','squareRoot')" style="grid-area: sqrt;">²√</button>
             <button class="button" onclick="operator('Math.cbrt(','³√(','cubeRoot')" style="grid-area: cbrt;">³√</button>
             <button class="button" onclick="operator('±','','plusOrMinus')" style="grid-area: másmenos;">±</button>
@@ -169,18 +169,52 @@
         </div>
         <div id="copyright">MathX calculator 2.0</div>
     </div>
-    <script>
+    <script type="text/javascript">
         const byId = selector => document.getElementById(selector);
         let nodeArray = [],nodeArray2 = [];
         let screenArray = [], screenArray2 = [];
-        let operation = [];
-        let open, close;
+        let operation = [],operation2 = [];
+        let open, close,pop;
+        let point = true;
 
-        function operator(node,display,IaN) {
+        function operator(node,display,IaN,ignore) {
 
-            if(IaN !== null){operation.push(IaN)}; 
+
+            if(IaN == "close"||IaN == "open" )point = true;
+            if(IaN == "squareRoot"||IaN == "cubeRoot"||IaN == "open"){
+                point = true;
+                if(operation[operation.length-1] == "number"){
+                    operator('*','x','operator','SI');
+                }
+            };
+            if(IaN == "operator"){
+                point = true;
+                if(operation[operation.length-1]=="operator"){
+                    operator('(','(','open');
+                }
+            };
+            if(IaN !== null){
+                if(IaN == "point"){
+                    if(point){
+                        operation.push(IaN);
+                    }
+                }else{operation.push(IaN)}
+            };
+            let screen = byId('screen')
             let subscreen1 = byId('subscreen1');
             let subscreen2 = byId('subscreen2');
+            screen.style.flexFlow = "row-reverse wrap-reverse";
+
+            if(node == 'Math.sqrt('||node == 'Math.cbrt('||node == '('){
+                nodeArray2.push(')');
+                screenArray2.push(')');
+                operation2.push('close')
+            }
+            if(node == nodeArray2[0]){
+                nodeArray2.shift();
+                screenArray2.shift();
+            }    
+
             switch (node) {
                 case 'L':
                     operation = [];
@@ -188,15 +222,16 @@
                     screenArray = []; screenArray2 = [];
                     subscreen1.innerHTML = screenArray.join('');
                     subscreen2.innerHTML = screenArray2.join('');
+                    point = true;
                     break;
                 case 'B':
-                    operation.pop();
-                    if(nodeArray2.join('') == ""){
-                        nodeArray.pop();
-                        screenArray.pop();
-                    }else{
-                        nodeArray2.pop();
-                        screenArray2.pop();
+                    parenthesisCount();
+                    pop = operation.pop();
+                    screenArray.pop();
+                    if(nodeArray.pop()==".")point = true;
+                    if(nodeArray.join('')==""){
+                        nodeArray2=[];
+                        screenArray2=[];
                     }
                     subscreen1.innerHTML = screenArray.join('');
                     subscreen2.innerHTML = screenArray2.join('');
@@ -211,32 +246,54 @@
                     }
                     break;
                 case '=':
-                    if(parenthesis() == 'Okey'){
-                        
-                        let a = nodeArray.join('') + nodeArray2.join('');
-                        let resultado = eval(a);
-                        subscreen1.innerHTML = resultado;
-                        nodeArray = []; screenArray = [];
-                        nodeArray2 = []; screenArray2 = [];
-                        nodeArray.push(resultado);
-                        screenArray.push(resultado);
-                    }else{
-                        subscreen2.innerHTML = screenArray.join('')+screenArray2.join('');
-                        subscreen1.innerHTML = 'SyntaxError  ';
+                    parenthesisCount();
+                    operation = operation.concat(operation2);
+                    let a = nodeArray.join('') + nodeArray2.join('');
+                    let resultado = eval(a);
+                    subscreen1.innerHTML = resultado;
+                    nodeArray = []; screenArray = [];
+                    nodeArray2 = []; screenArray2 = [];
+                    operation = [];
+                    nodeArray.push(resultado);
+                    screenArray.push(resultado);
+                    operation.push('number');
+                    break;
+                case '.':
+                    if(point){
+                        nodeArray.push(node);
+                        screenArray.push(display);
+                        point = false;
                     }
                     break;
-                    
                 default:
                     nodeArray.push(node);
                     screenArray.push(display);
                     break;
             }
+            console.log(operation,pop)
+            if(ignore !== "SI"){
+                if(IaN == "operator" && node !== "+" && node !== "-"){
+
+                    if(operation[operation.length-2] !== "number"){
+                        position('retroceder');
+                    }
+                }
+            }
+            if(pop == "open" || pop == "squareRoot" || pop == "cubeRoot"){
+
+                nodeArray2.splice(nodeArray2.indexOf(')'),1);
+                screenArray2.splice(screenArray2.indexOf(')'),1);
+                operation2.splice(operation2.indexOf('close'),1);
+            }
             subscreen1.innerHTML = screenArray.join('');
             subscreen2.innerHTML = screenArray2.join('');
+            pop = undefined;
+            parenthesisCount();
         }
 
-        function parenthesis(){
+        function parenthesisCount(){
 
+            let screen = byId('screen');
             open = 0; close = 0;
 
             for(i of nodeArray){
@@ -257,8 +314,12 @@
                     close++;
                 }
             }
-            if(open == close){
-                return 'Okey';
+            if(open < close){
+                for(open; open<close;open++){
+                    nodeArray.splice(nodeArray.lastIndexOf(')'),1);
+                    screenArray.splice(screenArray.lastIndexOf(')'),1);
+                    operation.splice(operation.lastIndexOf('close'),1);
+                }
             }
         }
 
@@ -269,6 +330,7 @@
                     if(nodeArray.join('') !== ""){
                         nodeArray2.unshift(nodeArray.pop());
                         screenArray2.unshift(screenArray.pop());
+                        operation2.unshift(operation.pop());
                         subscreen1.innerHTML = screenArray.join('');
                         subscreen2.innerHTML = screenArray2.join('');
                     }
@@ -277,12 +339,14 @@
                     if(nodeArray2.join('') !== ""){
                         nodeArray.push(nodeArray2.shift());
                         screenArray.push(screenArray2.shift());
+                        operation.push(operation2.shift());
                         subscreen1.innerHTML = screenArray.join('');
                         subscreen2.innerHTML = screenArray2.join('');
                     }
                     break;
             }
         }
+
     </script>    
 </body>
 </html>
